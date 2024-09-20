@@ -2,6 +2,7 @@ const express = require("express");
 const { body } = require("express-validator");
 
 const authController = require("../controllers/auth");
+const checkTokenMiddleware = require("../middlewares/isLogin");
 
 const router = express.Router();
 
@@ -34,5 +35,8 @@ router.post(
   ],
   authController.login
 );
+
+// GET check user token /check-token
+router.get("/check-token", checkTokenMiddleware, authController.checkUserToken);
 
 module.exports = router;
