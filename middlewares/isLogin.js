@@ -19,7 +19,6 @@ module.exports = async (req, res, next) => {
     req.userId = tokenIsMatched.userID;
     next();
   } catch (err) {
-    console.log("tokenMiddlewareFailed")
     return res.status(401).json({
       isSuccess: false,
       message: err.message,

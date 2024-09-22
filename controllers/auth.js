@@ -98,7 +98,7 @@ exports.login = async (req, res, next) => {
 exports.checkUserToken = async (req, res, next) => {
   try {
     const user = await User.findById(req.userId).select(
-      "name email role"
+      "username email role"
     );
     if (!user) {
       throw new Error("Unauthorized error");
