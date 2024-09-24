@@ -209,3 +209,53 @@ exports.uploadProductImages = async (req, res, next) => {
     });
   }
 };
+
+exports.getProductImage = async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    const product = await Product.findById(id).select("images");
+    if (!product.images.length > 0) {
+      throw new Error("This product owner has no product images!!!");
+    }
+    return res.status(200).json({
+      isSuccess: true,
+      message: "Product image found!!!",
+      product,
+    });
+  } catch (err) {
+    return res.status(404).json({
+      isSuccess: false,
+      message: err.message,
+    });
+  }
+};
+
+// /product/images/destroy/:productId/:imgDelUrl
+exports.deleteSavedProductImages = async (req, res, next) => {
+  try {
+    const { productId } = req.params;
+    const decodeImgDelUrl = decodeURIComponent(req.params.imgDelUrl);
+
+    await Product.findByIdAndUpdate(productId, {
+      $pull: { images: decodeImgDelUrl },
+    });
+
+    const public_id = decodeImgDelUrl.substring(
+      decodeImgDelUrl.lastIndexOf("/") + 1,
+      decodeImgDelUrl.lastIndexOf(".")
+    );
+
+    await cloudinary.uploader.destroy(public_id);
+
+    return res.status(200).json({
+      isSuccess: true,
+      message: "Image Destroyed!!!"
+    })
+
+  } catch (err) {
+    return res.status(404).josn({
+      isSuccess: false,
+      message: err.message,
+    });
+  }
+};

@@ -8,6 +8,7 @@ dotenv.config();
 
 const authRoutes = require("./routes/auth");
 const productRoutes = require("./routes/product");
+const adminRoutes = require("./routes/admin");
 
 const app = express();
 
@@ -40,6 +41,7 @@ app.use(
 
 app.use(authRoutes);
 app.use(productRoutes);
+app.use("/admin", adminRoutes);
 
 mongoose.connect(process.env.MONGODB_URL).then(() => {
   app.listen(4000);

@@ -94,4 +94,10 @@ router.post(
   productController.uploadProductImages
 );
 
+// GET /product-images/:id
+router.get("/product-images/:id", checkTokenMiddleware, productController.getProductImage);
+
+// DELETE /product/images/destroy/:productId/:imgDelUrl
+router.delete("/product/images/destroy/:productId/:imgDelUrl", checkTokenMiddleware, productController.deleteSavedProductImages)
+
 module.exports = router;

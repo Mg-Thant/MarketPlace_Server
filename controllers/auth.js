@@ -77,6 +77,10 @@ exports.login = async (req, res, next) => {
     if (!isMatched) {
       throw new Error("Invalid user credentials!!!");
     }
+    
+    if(user.status === "ban") {
+      throw new Error("User has banned!!!");
+    }
 
     const jwt_token = jwt.sign({ userID: user._id }, process.env.JWT_KEY, {
       expiresIn: "1d",
