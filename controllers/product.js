@@ -3,6 +3,7 @@ const cloudinary = require("cloudinary").v2;
 require("dotenv").config();
 
 const Product = require("../models/product");
+const SavedProduct = require("../models/savedProducts");
 
 cloudinary.config({
   cloud_name: "dpkugl0tk",
@@ -249,11 +250,68 @@ exports.deleteSavedProductImages = async (req, res, next) => {
 
     return res.status(200).json({
       isSuccess: true,
-      message: "Image Destroyed!!!"
-    })
-
+      message: "Image Destroyed!!!",
+    });
   } catch (err) {
     return res.status(404).josn({
+      isSuccess: false,
+      message: err.message,
+    });
+  }
+};
+
+exports.savedProducts = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    await SavedProduct.create({
+      user_id: req.userId,
+      product_id: id,
+    });
+
+    return res.status(200).json({
+      isSuccess: true,
+      message: "Product has saved!",
+    });
+  } catch (err) {
+    return res.status(401).json({
+      isSuccess: false,
+      message: "Unauthorized access",
+    });
+  }
+};
+
+exports.unSavedProducts = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    await SavedProduct.findOneAndDelete({ product_id: id });
+
+    return res.status(200).json({
+      isSuccess: true,
+      message: "Product successfully removed from the saved list!!!",
+    });
+  } catch (err) {
+    return res.status(500).json({
+      isSuccess: false,
+      message: err.message,
+    });
+  }
+};
+
+exports.getSavedProducts = async (req, res, next) => {
+  try {
+    const savedProducts = await SavedProduct.find({ user_id: req.userId })
+      .populate("product_id", "name category images description ")
+      .sort({ createdAt: -1 });
+    if (!savedProducts || savedProducts.lenght === 0) {
+      throw new Error("Saved product not found!!!");
+    }
+    return res.status(200).json({
+      isSuccess: true,
+      savedProducts,
+    });
+  } catch (err) {
+    return res.status(404).json({
       isSuccess: false,
       message: err.message,
     });

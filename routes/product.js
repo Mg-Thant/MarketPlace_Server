@@ -100,4 +100,14 @@ router.get("/product-images/:id", checkTokenMiddleware, productController.getPro
 // DELETE /product/images/destroy/:productId/:imgDelUrl
 router.delete("/product/images/destroy/:productId/:imgDelUrl", checkTokenMiddleware, productController.deleteSavedProductImages)
 
+// POST /saved-products/:id
+router.post("/saved-products/:id", checkTokenMiddleware, productController.savedProducts);
+
+// DELETE /unsaved-products/:id
+router.delete("/unsaved-products/:id", checkTokenMiddleware, productController.unSavedProducts);
+
+// GET /unsaved-product
+router.get("/saved-product", checkTokenMiddleware, productController.getSavedProducts);
+
+
 module.exports = router;
