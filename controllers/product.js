@@ -181,6 +181,13 @@ exports.uploadProductImages = async (req, res, next) => {
   const images = req.files;
   const { product_id } = req.body;
   let secureUrlArray = [];
+
+  const product = await Product.findOne({ _id: product_id });
+
+  if (req.userId.toString() !== product.seller.toString()) {
+    throw new Error("Authorization Failed!!!");
+  }
+
   try {
     images.forEach((img) => {
       cloudinary.uploader.upload(img.path, async (err, result) => {
@@ -214,10 +221,16 @@ exports.uploadProductImages = async (req, res, next) => {
 exports.getProductImage = async (req, res, next) => {
   const { id } = req.params;
   try {
-    const product = await Product.findById(id).select("images");
-    if (!product.images.length > 0) {
+    const product = await Product.findById(id).select("images seller");
+
+    if (req.userId.toString() !== product.seller.toString()) {
+      throw new Error("Authorization Failed!!!");
+    }
+
+    if (product.images.length === 0) {
       throw new Error("This product owner has no product images!!!");
     }
+
     return res.status(200).json({
       isSuccess: true,
       message: "Product image found!!!",
@@ -236,6 +249,12 @@ exports.deleteSavedProductImages = async (req, res, next) => {
   try {
     const { productId } = req.params;
     const decodeImgDelUrl = decodeURIComponent(req.params.imgDelUrl);
+
+    const product = await Product.findOne({ _id: productId });
+
+    if (req.userId.toString() !== product.seller.toString()) {
+      throw new Error("Authorization Failed!!!");
+    }
 
     await Product.findByIdAndUpdate(productId, {
       $pull: { images: decodeImgDelUrl },
@@ -264,10 +283,12 @@ exports.savedProducts = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const isExistsProduct = await SavedProduct.findOne({$and: [{user_id: req.userId}, {product_id: id}]});
+    const isExistsProduct = await SavedProduct.findOne({
+      $and: [{ user_id: req.userId }, { product_id: id }],
+    });
 
-    if(isExistsProduct) {
-      throw new Error("Product has been saved!!!")
+    if (isExistsProduct) {
+      throw new Error("Product has been saved!!!");
     }
 
     await SavedProduct.create({

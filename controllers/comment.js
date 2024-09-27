@@ -15,6 +15,10 @@ exports.savedNewComment = async (req, res, next) => {
   try {
     const { comment, phone, product_id, seller_id, bider_id } = req.body;
 
+    if(seller_id === bider_id) {
+      throw new Error("Authorization Failed!!!")
+    }
+
     await Comment.create({
       product_id,
       seller_id,
@@ -41,7 +45,7 @@ exports.getAllComment = async (req, res, next) => {
     const comments = await Comment.find({ product_id: productId })
       .populate("bider_id", "username")
       .select("comment phone_number createdAt")
-      .sort({ createdAt: -1});
+      .sort({ createdAt: -1 });
 
     if (comments.length === 0) {
       throw new Error("No comment found for this product!!!");
