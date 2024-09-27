@@ -2,17 +2,32 @@ const Product = require("../models/product");
 const User = require("../models/user");
 
 exports.getProducts = async (req, res, next) => {
+  const page = +req.query.page || 1;
+  const perPage = 10;
   try {
     const products = await Product.find()
       .populate("seller", "username")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * perPage)
+      .limit(perPage);
+
     if (!products) {
       throw new Error("Product not found");
     }
+    const totalProducts = await Product.countDocuments();
+    const pendingProducts = await Product.find({
+      status: "pending",
+    }).countDocuments();
+    const totalPages = Math.ceil(totalProducts / perPage);
+
     return res.status(200).json({
       isSuccess: true,
       message: "Product Found!!!",
       products,
+      currentPage: page,
+      totalPages,
+      totalProducts,
+      pendingProducts,
     });
   } catch (err) {
     return res.status(404).json({

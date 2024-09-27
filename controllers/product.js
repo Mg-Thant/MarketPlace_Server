@@ -264,6 +264,12 @@ exports.savedProducts = async (req, res, next) => {
   try {
     const { id } = req.params;
 
+    const isExistsProduct = await SavedProduct.findOne({$and: [{user_id: req.userId}, {product_id: id}]});
+
+    if(isExistsProduct) {
+      throw new Error("Product has been saved!!!")
+    }
+
     await SavedProduct.create({
       user_id: req.userId,
       product_id: id,
@@ -274,9 +280,9 @@ exports.savedProducts = async (req, res, next) => {
       message: "Product has saved!",
     });
   } catch (err) {
-    return res.status(401).json({
+    return res.status(400).json({
       isSuccess: false,
-      message: "Unauthorized access",
+      message: err.message,
     });
   }
 };
@@ -301,7 +307,7 @@ exports.unSavedProducts = async (req, res, next) => {
 exports.getSavedProducts = async (req, res, next) => {
   try {
     const savedProducts = await SavedProduct.find({ user_id: req.userId })
-      .populate("product_id", "name category images description ")
+      .populate("product_id", "name category images description price")
       .sort({ createdAt: -1 });
     if (!savedProducts || savedProducts.lenght === 0) {
       throw new Error("Saved product not found!!!");

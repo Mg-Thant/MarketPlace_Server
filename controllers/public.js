@@ -2,18 +2,33 @@ const { default: mongoose } = require("mongoose");
 const Product = require("../models/product");
 
 exports.getProducts = async (req, res, next) => {
+  const page = +req.query.page || 1;
+  const postPerPage = +req.query.perPage || 6;
+
   try {
     const products = await Product.find({ status: "approve" })
       .populate("seller", "username")
       .sort({
         createdAt: -1,
-      });
+      })
+      .skip((page - 1) * postPerPage)
+      .limit(postPerPage);
+
+    const totalProducts = await Product.find({
+      status: "approve",
+    }).countDocuments();
+    const totalPages = Math.ceil(totalProducts / postPerPage);
+
     if (!products || products.length == 0) {
       throw new Error("Product not found!!!");
     }
+
     return res.status(200).json({
       isSuccess: true,
       products,
+      totalProducts,
+      totalPages,
+      currentPage: page,
     });
   } catch (err) {
     return res.status(404).json({
@@ -35,6 +50,7 @@ exports.getProductDetails = async (req, res, next) => {
       "seller",
       "username email"
     );
+
     if (!product) {
       throw new Error("Product not found!!!");
     }

@@ -24,7 +24,7 @@ exports.register = (req, res, next) => {
     })
     .then((user) => {
       if (user) {
-        throw new Error("User already exists");
+        throw new Error("Username already exists");
       }
       return bcrypt.hash(password, 10);
     })

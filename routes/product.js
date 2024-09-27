@@ -3,6 +3,8 @@ const { body } = require("express-validator");
 
 const checkTokenMiddleware = require("../middlewares/isLogin");
 const productController = require("../controllers/product");
+const commentController = require("../controllers/comment");
+const notificationController = require("../controllers/notification");
 
 const router = express.Router();
 
@@ -95,19 +97,87 @@ router.post(
 );
 
 // GET /product-images/:id
-router.get("/product-images/:id", checkTokenMiddleware, productController.getProductImage);
+router.get(
+  "/product-images/:id",
+  checkTokenMiddleware,
+  productController.getProductImage
+);
 
 // DELETE /product/images/destroy/:productId/:imgDelUrl
-router.delete("/product/images/destroy/:productId/:imgDelUrl", checkTokenMiddleware, productController.deleteSavedProductImages)
+router.delete(
+  "/product/images/destroy/:productId/:imgDelUrl",
+  checkTokenMiddleware,
+  productController.deleteSavedProductImages
+);
 
 // POST /saved-products/:id
-router.post("/saved-products/:id", checkTokenMiddleware, productController.savedProducts);
+router.post(
+  "/saved-products/:id",
+  checkTokenMiddleware,
+  productController.savedProducts
+);
 
 // DELETE /unsaved-products/:id
-router.delete("/unsaved-products/:id", checkTokenMiddleware, productController.unSavedProducts);
+router.delete(
+  "/unsaved-products/:id",
+  checkTokenMiddleware,
+  productController.unSavedProducts
+);
 
 // GET /unsaved-product
-router.get("/saved-product", checkTokenMiddleware, productController.getSavedProducts);
+router.get(
+  "/saved-product",
+  checkTokenMiddleware,
+  productController.getSavedProducts
+);
 
+// POST /add-comment
+router.post(
+  "/add-comment",
+  checkTokenMiddleware,
+  [
+    body("comment").trim().notEmpty().withMessage("Comment is required"),
+    body("phone").trim().notEmpty().withMessage("Phone number is required"),
+  ],
+  commentController.savedNewComment
+);
+
+// GET /comments/:productId
+router.get("/comments/:productId", commentController.getAllComment);
+
+// POST /notify
+router.post(
+  "/notify",
+  checkTokenMiddleware,
+  notificationController.pushNotification
+);
+
+// GET /notifications
+router.get(
+  "/notifications",
+  checkTokenMiddleware,
+  notificationController.getAllNoti
+);
+
+// GET /notifications-read/:id
+router.get(
+  "/notifications-read/:id",
+  checkTokenMiddleware,
+  notificationController.markAsRead
+);
+
+// delete /notifications-delOne/:id
+router.delete(
+  "/notifications-delOne/:id",
+  checkTokenMiddleware,
+  notificationController.deleteNoti
+);
+
+// delete /notifications-delAll
+router.delete(
+  "/notifications-delAll",
+  checkTokenMiddleware,
+  notificationController.deleteAllNoti
+);
 
 module.exports = router;
